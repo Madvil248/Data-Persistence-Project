@@ -11,21 +11,24 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
-    
+    public GameObject NewHighScoreText;
+
     private bool m_Started = false;
     private int m_Points;
-    
-    private bool m_GameOver = false;
 
-    
+    private bool m_GameOver = false;
+    private string highScoreText = "0";
+
+
     // Start is called before the first frame update
     void Start()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -36,6 +39,7 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        SetHighScoreDisplay();
     }
 
     private void Update()
@@ -59,6 +63,10 @@ public class MainManager : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+            else if (Input.GetKeyDown(KeyCode.M))
+            {
+                SceneManager.LoadScene(0);
+            }
         }
     }
 
@@ -72,5 +80,45 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+
+        if (CheckForNewHighScore(m_Points))
+        {
+            NewHighScoreText.SetActive(true);
+        }
+    }
+
+    public void SetScore()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SaveHighScore(GameManager.Instance.PlayerName, m_Points);
+            SetHighScoreDisplay();
+        }
+    }
+
+    private void SetHighScoreDisplay()
+    {
+        if (GameManager.Instance != null)
+        {
+            if (GameManager.Instance.HighScores.Count > 0)
+            {
+                highScoreText = GameManager.Instance.HighScores[0].Name + ": " + GameManager.Instance.HighScores[0].Score.ToString();
+            }
+            BestScoreText.text = "Best Score: " + highScoreText;
+        }
+    }
+
+    private bool CheckForNewHighScore(int currentScore)
+    {
+        if (GameManager.Instance == null || GameManager.Instance.HighScores == null)
+        {
+            return false;
+        }
+        else if (GameManager.Instance.HighScores.Count == 0)
+        {
+            return true;
+        }
+
+        return GameManager.Instance.HighScores[0].Score < m_Points;
     }
 }

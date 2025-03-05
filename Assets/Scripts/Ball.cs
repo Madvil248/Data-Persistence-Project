@@ -6,10 +6,14 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
     private Rigidbody m_Rigidbody;
+    public AudioClip BallHitSound;
+
+    private AudioSource AudioSource;
 
     void Start()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
+        AudioSource = GetComponent<AudioSource>();
     }
     
     private void OnCollisionExit(Collision other)
@@ -32,5 +36,7 @@ public class Ball : MonoBehaviour
         }
 
         m_Rigidbody.velocity = velocity;
+
+        AudioSource.PlayOneShot(BallHitSound);
     }
 }
